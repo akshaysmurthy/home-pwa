@@ -1,0 +1,10 @@
+[
+  {
+    "roomName": "Room 1",
+    "bulbHost": "room1.host.name"
+  },
+  {
+    "roomName": "Room 2",
+    "bulbHost": "room2.host.name"
+  }
+]
