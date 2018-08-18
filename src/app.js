@@ -2,16 +2,16 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Switch from './switch';
 
-export default class App extends React.Component {  
+export default class App extends React.Component {
   render() {
     return (
       <div id="app">
         <h1>Home</h1>
         <div className="switches-container">
           {
-            this.props.switches.map((switchObj, i) => {     
+            this.props.switches.map((switchObj, i) => {
               return (
-                <Switch key={i} bulbHost={switchObj.bulbHost} roomName={switchObj.roomName}/>
+                <Switch key={i} bulbHost={switchObj.bulbHost} roomName={switchObj.roomName} />
               );
             })
           }

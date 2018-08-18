@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 export default class Switch extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { toggleState: 1 };
+    this.state = { toggleState: 0 };
   }
 
   componentDidMount() {
@@ -12,28 +12,27 @@ export default class Switch extends React.Component {
       this.setState({ toggleState: parseInt(responseText) });
     });
   }
-
+  
   getToggleState() {
     return fetch(`http://${this.props.bulbHost}/status`)
       .then(response => response.text());
   }
-  
+
   handleClick() {
     const newToggleState = +!this.state.toggleState;
     this.setState(() => ({
       toggleState: newToggleState
     }));
     setTimeout(() => {
-      console.log(`http://${this.props.bulbHost}/set_state?state=${newToggleState}`);
-      // fetch(`http://${this.props.bulbHost}/set_state?state=${newToggleState}`);
+      fetch(`http://${this.props.bulbHost}/set_state?state=${newToggleState}`);
     }, 100);
   }
 
   render() {
-    const { toggleState, roomName } = { 
+    const { toggleState, roomName } = {
       ...this.state,
       ...this.props
-    };    
+    };
     const toggleStateClassName = toggleState === 1 ? 'on' : 'off';
     const wallClassName = toggleState === 1 ? 'bright' : 'dark';
     return (
