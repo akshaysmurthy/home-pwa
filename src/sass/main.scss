@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css?family=Roboto:500');
 
 $transition-duration: 0.5s;
-$theme-color: #e04f5f;
+$theme-color: #feab59;
 
 html {
   position: fixed;
@@ -21,7 +21,7 @@ body {
 
   > h1 {
     text-align: center;
-    margin-top: 10px;
+    margin-top: 12px;
     color: $theme-color;
   }
 }
@@ -54,12 +54,8 @@ body {
   }
 
   &:nth-child(1) {
-    border-right: 5px solid $theme-color;
+    margin-right: 10px;
   }
-  
-  &:nth-child(2) {
-    border-left: 5px solid $theme-color;
-  }  
   
   &.bright {
     background-color: white;
@@ -70,10 +66,11 @@ body {
   }
 
   &.dark {
-    background-color: #dfa6b1;
+    background-color: lighten($theme-color, 15%);
     
     h1 {
       color: white;
+      text-shadow: 0px 0px 1px $theme-color;
     }
   }  
   
