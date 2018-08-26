@@ -7,17 +7,32 @@ describe('Switch', () => {
   const bulbHost = 'some.host';
   const roomName = 'Bedroom'
 
-  const mockFetchAndReturn = (returnValue) => {
-    fetch = jest.fn().mockImplementation(() => {
-      return new Promise((resolve, reject) => {
-        resolve({ text: () => returnValue });
-      });
+  const mockServerOnBulbAndReturn = (returnValue) => {
+    global.fetch = jest.fn().mockResolvedValue({
+      text: () => returnValue
     });
   };
 
+  const triggerTouchMoveEvents = (yValues) => {
+    yValues.forEach((yDisplacement) => {
+      switchComponent.find('.switch-outer')
+        .simulate('touchmove', {
+          touches: [{ clientY: yDisplacement }]
+        });
+    });
+  }
+
+  beforeEach(() => {
+    mockServerOnBulbAndReturn();
+  });
+
+  afterEach(() => {
+    global.fetch.mockRestore();
+  });
+
   describe('on mount', () => {
     it('gets the state from the bulb', () => {
-      mockFetchAndReturn('100');
+      mockServerOnBulbAndReturn('100');
 
       switchComponent = shallow(<Switch bulbHost={bulbHost} roomName={roomName}/>);
 
@@ -29,9 +44,11 @@ describe('Switch', () => {
     });
   });
 
-  describe('after render', () => {
+  describe('on render', () => {
     beforeEach(() => {
-      switchComponent = shallow(<Switch bulbHost={bulbHost} roomName={roomName}/>);
+      switchComponent = shallow(<Switch bulbHost={bulbHost} roomName={roomName}/>, {
+        disableLifecycleMethods: true
+      });
     });
 
     it('has the title', () => {
@@ -41,34 +58,50 @@ describe('Switch', () => {
     it('toggles off if the toggle state is 0', () => {
       switchComponent.setState({ toggleState: 0 });
 
-      expect(switchComponent.find('.switch-inner.off').exists()).toBe(true);
+      expect(switchComponent.find('.switch-inner').hasClass('off')).toBe(true);
     });
 
     it('toggles off if the toggle state is 1', () => {
       switchComponent.setState({ toggleState: 1 });
 
-      expect(switchComponent.find('.switch-inner.on').exists()).toBe(true);
+      expect(switchComponent.find('.switch-inner').hasClass('on')).toBe(true);
     });
   });
 
-  describe('on click', () => {
+  describe('on swiping up', () => {
     beforeEach(() => {
-      mockFetchAndReturn('0');
-      switchComponent = shallow(<Switch bulbHost={bulbHost} roomName={roomName}/>);
-      switchComponent.setState({ toggleState: 1 });
-      switchComponent.find('.switch-outer').simulate('click');
+      switchComponent = shallow(<Switch bulbHost={bulbHost} roomName={roomName}/>, {
+        disableLifecycleMethods: true
+      });
+      triggerTouchMoveEvents([40, 30, 10]);
+      switchComponent.find('.switch-outer').simulate('touchend');
     });
 
-    it('toggles its state', () => {
-      expect(switchComponent.state().toggleState).toEqual(0);
+    it('toggles on', () => {
+      expect(switchComponent.find('.switch-inner').hasClass('on')).toBe(true);
     });
 
     it('sends the new state to the bulb', () => {
-      jest.runAllTimers();
+      expect(global.fetch).toHaveBeenCalledWith(`http://${bulbHost}/set_state?state=1`);
+    });
+  });
 
-      expect(global.fetch).toHaveBeenCalledWith(`http://${bulbHost}/set_state?state=0`);
+  describe('on swiping down', () => {
+    beforeEach(() => {
+      switchComponent = shallow(<Switch bulbHost={bulbHost} roomName={roomName}/>, {
+        disableLifecycleMethods: true
+      });
+      triggerTouchMoveEvents([10, 30, 40]);
+      switchComponent.find('.switch-outer').simulate('touchend');
     });
 
+    it('toggles on', () => {
+      expect(switchComponent.find('.switch-inner').hasClass('off')).toBe(true);
+    });
+
+    it('sends the new state to the bulb', () => {
+      expect(global.fetch).toHaveBeenCalledWith(`http://${bulbHost}/set_state?state=0`);
+    });
   });
 
 });

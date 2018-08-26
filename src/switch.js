@@ -12,20 +12,26 @@ export default class Switch extends React.Component {
       this.setState({ toggleState: parseInt(responseText) });
     });
   }
-  
+
   getToggleState() {
     return fetch(`http://${this.props.bulbHost}/status`)
       .then(response => response.text());
   }
 
-  handleClick() {
-    const newToggleState = +!this.state.toggleState;
-    this.setState(() => ({
-      toggleState: newToggleState
-    }));
-    setTimeout(() => {
-      fetch(`http://${this.props.bulbHost}/set_state?state=${newToggleState}`);
-    }, 100);
+  setToggleState(newToggleState) {
+    this.setState({ toggleState: newToggleState });
+    fetch(`http://${this.props.bulbHost}/set_state?state=${newToggleState}`);
+  }
+
+  handleTouchMove(event) {
+    this.touches = this.touches || [];
+    this.touches = [...this.touches, ...event.touches];
+  }
+
+  handleTouchEnd() {
+    const yValues = this.touches.map(touch => touch.clientY);
+    const verticalDisplacement = yValues[0] - yValues[yValues.length - 1];
+    this.setToggleState(verticalDisplacement > 0 ? 1 : 0)
   }
 
   render() {
@@ -38,7 +44,7 @@ export default class Switch extends React.Component {
     return (
       <div className={`wall ${wallClassName}`}>
         <h1>{roomName}</h1>
-        <div className='switch-outer' onClick={this.handleClick.bind(this)}>
+        <div className='switch-outer' onTouchMove={this.handleTouchMove.bind(this)} onTouchEnd={this.handleTouchEnd.bind(this)}>
           <div className={`switch-inner ${toggleStateClassName}`}>
           </div>
         </div>
